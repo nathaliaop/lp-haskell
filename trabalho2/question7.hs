@@ -35,29 +35,7 @@ type Horario = Int
 type Receituario = [(Medicamento, [Horario])]
 
 type PlanoMedicamento = [(Horario, [Medicamento])]
-
-geraReceituarioPlano :: PlanoMedicamento -> Receituario
-geraReceituarioPlano [] = []
-geraReceituarioPlano (p:ps) = quickSort (comprimeReceituario (geraReceituario (fst(p)) (snd(p)) ++ geraReceituarioPlano ps))
-                                where
-                                geraReceituario _ [] = []
-                                geraReceituario h (m:ms) = (m,[h]):(geraReceituario h ms)
-                                
-                                comprimeReceituario [] = []
-                                comprimeReceituario (p:ps) = (adicionaHorario p ps) ++ comprimeReceituario (filtraRepetidos (fst(p)) (ps))
-                                                        where
-                                                        
-                                                        adicionaHorario (m,h) [] = [(m,h)]
-                                                        adicionaHorario (m,h) (p:ps) | existe m p = (adicionaHorario (m, h ++ snd(p)) ps)
-                                                                                     | otherwise = adicionaHorario (m,h) ps
-                                                                                     where
-                                                                                     existe med (m,h) = med == m
-                                
-                                                        filtraRepetidos m ps = filter (horariosIguais m) ps
-                                                                               where horariosIguais m p = m /= fst(p)
-                                quickSort [] = []
-                                quickSort ((ma,ha):rs) = quickSort [x | x <- rs, fst(x) <= ma] ++ [(ma, ha)] ++ quickSort [x | x <- rs, fst(x) > ma]
-                                
+                  
 geraPlanoReceituario :: Receituario -> PlanoMedicamento
 geraPlanoReceituario [] = []
 geraPlanoReceituario (r:rs) = quickSort (comprimePlano (geraPlano (fst(r)) (snd(r)) ++ geraPlanoReceituario rs))
@@ -85,5 +63,4 @@ geraPlanoReceituario (r:rs) = quickSort (comprimePlano (geraPlano (fst(r)) (snd(
 
 main :: IO ()
 main =  do
-print(geraReceituarioPlano [(6,["Pantoprazol"]),(8,["Lactulona","Quetiapina"]),(17,["Lactulona"]),(22,["Patz","Quetiapina"]),(23,["Quetiapina"])])
 print(geraPlanoReceituario [("Lactulona", [8, 17]), ("Pantoprazol", [6]), ("Patz", [22]), ("Quetiapina", [8, 22, 23])])
