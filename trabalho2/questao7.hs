@@ -38,7 +38,7 @@ type PlanoMedicamento = [(Horario, [Medicamento])]
 
 geraPlanoReceituario :: Receituario -> PlanoMedicamento
 geraPlanoReceituario [] = []
-geraPlanoReceituario (r:rs) = comprimePlano (geraPlano (fst(r)) (snd(r)) ++ geraPlanoReceituario rs)
+geraPlanoReceituario (r:rs) = quickSort (comprimePlano (geraPlano (fst(r)) (snd(r)) ++ geraPlanoReceituario rs))
                                 where
                                 geraPlano _ [] = []
                                 geraPlano m (h:hs) = (h,[m]):(geraPlano m hs)
@@ -54,7 +54,12 @@ geraPlanoReceituario (r:rs) = comprimePlano (geraPlano (fst(r)) (snd(r)) ++ gera
                                                                                     existe hor (h,m) = hor == h
                                 
                                                         filtraRepetidos h rs = filter (funcao h) rs
-                                                                         where funcao h r = h /= fst(r)
+                                                                               where funcao h r = h /= fst(r)
+
+
+                                quickSort [] = []
+                                quickSort ((ha,ma):ps) = quickSort [x | x <- ps, fst(x) <= ha] ++ [(ha, ma)] ++ quickSort [x | x <- ps, fst(x) > ha]
+
 
 main :: IO ()
 main =  do
