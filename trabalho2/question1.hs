@@ -1,11 +1,11 @@
 comprarMedicamento :: Medicamento -> Quantidade -> EstoqueMedicamentos -> EstoqueMedicamentos
 comprarMedicamento m q [] = [(m,q)]
-comprarMedicamento m q (e:es) | not (found m (e:es)) = (m,q):(e:es)
+comprarMedicamento m q (e:es) | not (existe m (e:es)) = (m,q):(e:es)
                               | (fst(e) == m) = (m,q + snd(e)):es 
                               | otherwise = e:comprarMedicamento m q es
                               where
-                              found m [] = False
-                              found m (l:ls) | (fst(l) /= m) = found m ls
+                              existe m [] = False
+                              existe m (l:ls) | (fst(l) /= m) = existe m ls
                                              | (fst(l) == m) = True
 
 main :: IO ()
