@@ -81,37 +81,20 @@ consultarMedicamento m (e:es) | (fst(e) == m) = snd(e)
 -- tenta tomar o medicamento e se retornar Nothing, compra
 
 plantaoCorreto :: PlanoMedicamento -> EstoqueMedicamentos -> Plantao
-plantaoCorreto p estoque = concatena (geraPlantao p) (listaCompras (comparaEstoque (geraEstoquePlano p []) estoque))
-                            where
-                            quickSort [] = []
-                            quickSort ((ma,ha):rs) = quickSort [x | x <- rs, fst(x) <= ma] ++ [(ma, ha)] ++ quickSort [x | x <- rs, fst(x) > ma]
-                            
-                            concatena ((h,m):ps) e = ((h,m ++ e):ps)
-                            
-                            geraPlantao [] = []
-                            geraPlantao ((h,m):ps) = (h, converteCuidado m):(geraPlantao ps)
-                                                        where
-                                                        converteCuidado med = [Medicar m | m <- med]
-                                                        
-                            listaCompras e = [Comprar m q | (m,q) <- e]
-                            
-                            -- previsto real
-                            comparaEstoque [] _ = []
-                            comparaEstoque _ [] = []
-                            comparaEstoque ((ma,qa):eas) ((mb,qb):ebs) | ma == mb && qa <= qb = comparaEstoque eas ebs
-                                                                       | ma == mb && qa > qb = (ma, qa - qb):(comparaEstoque eas ebs)
-                                                                       | otherwise = (ma, qa):(comparaEstoque eas ((mb,qb):ebs))
-
-                            geraEstoquePlano [] e = quickSort e
-                            geraEstoquePlano ((h,m):ps) e = geraEstoquePlano ps (atualizaEstoque m e)
-                                                            where
-                                                            atualizaEstoque [] e = e
-                                                            atualizaEstoque (m:ms) e | (consultarMedicamento m e) > 0 = atualizaEstoque ms (comprarMedicamento m 1 e)
-                                                                                     | otherwise = atualizaEstoque ms ((m,1):e)
+plantaoCorreto [] _ = []
+plantaoCorreto ((h,m):ps) e = (h,(geraCuidado m e)):(plantaoCorreto ps (atualizaEstoque m e))
+    where
+    geraCuidado [] _ = []
+    geraCuidado (m:ms) e | isNothing(tomarMedicamento m e) = (Comprar m 1):(Medicar m):(geraCuidado ms e)
+                         | otherwise = (Medicar m):(geraCuidado ms (fromJust(tomarMedicamento m e)))
+    atualizaEstoque [] e = e
+    atualizaEstoque (m:ms) e | isNothing(tomarMedicamento m e) = atualizaEstoque ms e
+                              | otherwise = atualizaEstoque ms (fromJust(tomarMedicamento m e))
+    isNothing Nothing = True
+    isNothing _ = False
+    fromJust (Just c) = c                       
                             
                             
-                            
-
 main :: IO ()
 main =  do
 print(plantaoCorreto plano estoque)

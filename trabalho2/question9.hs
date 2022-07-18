@@ -66,28 +66,18 @@ comprarMedicamento m q (e:es) | not (existe m (e:es)) = (m,q):(e:es)
                               existe m (l:ls) | (fst(l) /= m) = existe m ls
                                               | (fst(l) == m) = True
                                              
-tomarMedicamento :: Medicamento -> EstoqueMedicamentos -> Maybe EstoqueMedicamentos
-tomarMedicamento _ [] = Nothing
-tomarMedicamento m (e:es) | (fst(e) == m) && snd(e) > 1 = Just ((m, snd(e) - 1):es)
-                          | (fst(e) == m) && snd(e) == 1 = Just es
-                          | otherwise = case (tomarMedicamento m es) of
-                                        Just n -> Just (e:n)
-                                        Nothing -> Nothing
-                                        
 executaPlantao :: Plantao -> EstoqueMedicamentos -> Maybe EstoqueMedicamentos
-executaPlantao [] est = Just est
-executaPlantao ((h,c):hs) est | isNothing (executaCuidado c est) = Nothing
-                              | otherwise = executaPlantao hs (fromJust (executaCuidado c est))
+executaPlantao [] e = Just e
+executaPlantao ((h,c):ps) e | isNothing(executaCuidado c e) = Nothing
+                            | otherwise = executaPlantao ps (fromJust(executaCuidado c e))
                                 where
                                 fromJust (Just c) = c
-                                isNothing (Nothing) = True
+                                isNothing Nothing = True
                                 isNothing _ = False
-                                executaCuidado [] est = Just est
-                                executaCuidado (c:cs) est | isNothing (cuida c) = Nothing
-                                                          | otherwise = executaCuidado cs (fromJust (cuida c))
-                                cuida (Comprar m q) = Just (comprarMedicamento m q est)
-                                cuida (Medicar m) = tomarMedicamento m est
-
+                                executaCuidado [] e = Just e
+                                executaCuidado ((Medicar m):cs) e | isNothing (tomarMedicamento m e) = Nothing
+                                                                  | otherwise = executaCuidado cs (fromJust(tomarMedicamento m e))
+                                executaCuidado ((Comprar m q):cs) e = executaCuidado cs (comprarMedicamento m q e)
 main :: IO ()
 main =  do
 print(executaPlantao plantao estoque)
