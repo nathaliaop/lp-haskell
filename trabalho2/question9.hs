@@ -65,7 +65,15 @@ comprarMedicamento m q (e:es) | not (existe m (e:es)) = (m,q):(e:es)
                               existe m [] = False
                               existe m (l:ls) | (fst(l) /= m) = existe m ls
                                               | (fst(l) == m) = True
-                                             
+                                              
+tomarMedicamento :: Medicamento -> EstoqueMedicamentos -> Maybe EstoqueMedicamentos
+tomarMedicamento _ [] = Nothing
+tomarMedicamento m (e:es) | (fst(e) == m) && snd(e) > 1 = Just ((m, snd(e) - 1):es)
+                          | (fst(e) == m) && snd(e) == 1 = Just es
+                          | otherwise = case (tomarMedicamento m es) of
+                                                    Just n -> Just (e:n)
+                                                                                                 Nothing -> Nothing
+
 executaPlantao :: Plantao -> EstoqueMedicamentos -> Maybe EstoqueMedicamentos
 executaPlantao [] e = Just e
 executaPlantao ((h,c):ps) e | isNothing(executaCuidado c e) = Nothing
